@@ -1,0 +1,17 @@
+factorial : (n: Int | n >= 0) -> (v: Int | v > 0)
+factorial n = if n == 0 then 1 else n * factorial (n - 1)
+
+fib : (n: Int | n >= 0) -> (v: Int | v >= 0)
+fib n = if n == 0 then 0 else if n == 1 then 1 else fib (n - 1) + fib (n - 2)
+
+data Response = Response {
+    status  : Int
+  , headers : [String]
+  , body    : String
+}
+
+withCode : (code: Int) -> Response -> Maybe (v: Response | status v == code)
+withCode code response = if status response == code then Just response else Nothing
+
+main : (argc: Int) -> (argv: [String] | length argv == argc) -> Int
+main argc argv = factorial argc
