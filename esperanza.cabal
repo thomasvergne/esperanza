@@ -60,7 +60,22 @@ library
   import:           warnings
 
   -- Modules exported by the library.
-  exposed-modules:  MyLib
+  exposed-modules:
+    Language.Esperanza.CST.Expression
+      Language.Esperanza.CST.Modules.Annotated
+      Language.Esperanza.CST.Modules.Literal
+      Language.Esperanza.CST.Modules.Namespaced
+      Language.Esperanza.CST.Modules.Type
+      Language.Esperanza.CST.Modules.Located
+    Language.Esperanza.CST.Toplevel
+
+    Language.Esperanza.Parser
+      Language.Esperanza.Parser.Expression
+        Language.Esperanza.Parser.Modules.Literal
+        Language.Esperanza.Parser.Modules.Operators
+        Language.Esperanza.Parser.Modules.Pattern
+      Language.Esperanza.Parser.Toplevel
+      Language.Esperanza.Parser.Lexer
 
   -- Modules included in this library but not exported.
   -- other-modules:
@@ -103,10 +118,19 @@ executable esperanza-compiler
   -- LANGUAGE extensions used by modules in this package.
   -- other-extensions:
 
+  mixins:
+    base hiding (Prelude),
+    relude (Relude as Prelude),
+    relude
+
+  default-extensions:
+    OverloadedStrings
+
   -- Other library packages from which modules are imported.
   build-depends:
     , base       ^>=4.14.3.0
     , esperanza
+    , relude
 
   -- Directories containing source files.
   hs-source-dirs:   app
