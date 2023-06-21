@@ -163,6 +163,7 @@ term =
     , L.reserved "string" $> D.TypeApp (D.TypeId "[]") D.TypeChar
     , L.reserved "char" $> D.TypeChar
     , L.reserved "unit" $> D.TypeVoid
+    , L.brackets (D.TypeApp (D.TypeId "[]") <$> parseType)
     , refinement
     , P.try (fromString <$> L.lowered <&> D.TypeVar)
     , (L.namespacedUpper <|> fromString <$> L.parens L.operator) <&> D.TypeId

@@ -8,8 +8,6 @@ import           Data.Char
 import           Language.Esperanza.CST.Modules.Located
 import qualified Text.Parsec                            as P
 import qualified Text.Parsec.Token                      as Token
-import Text.Parsec.Error (newErrorMessage, Message (Expect))
-import Text.Parsec (State(statePos))
 
 type Esperanza a = Parser (Located a)
 
