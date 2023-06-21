@@ -31,7 +31,6 @@ data Expression
 data CaseBranch
   = PLiteral Literal
   | PVariable Text
-  | PRecord Namespaced (M.Map (Located CaseBranch) Text)
   | PConstructor Namespaced [Located CaseBranch]
   | PHole
   deriving (Eq, Show, Ord)
