@@ -1,0 +1,3 @@
+module Module.Helper 
+  let welcome username = do
+    print $ ("Welcome " <> username <> "!")

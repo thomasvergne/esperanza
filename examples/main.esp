@@ -1,4 +1,5 @@
 module Main
+  open "Module/Helper"
   type Response = Response (status: int) (body: string)
 
   let withCode (code: int) (res: Response): Option (r: Response | status r == code) = do
@@ -6,9 +7,9 @@ module Main
       then Just res 
       else Nothing
 
-  let main = do
+  let main (argc: int) (argv: [string] | length argv == argc) = do
     let 
       res  = Response 200 "Hello, world"
       res' = withCode 200 res 
     print (Response.show res')
-
+    welcome "test"
