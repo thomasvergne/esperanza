@@ -5,12 +5,12 @@ module Language.Esperanza.Parser.Toplevel where
 import qualified Control.Applicative                      as A
 import qualified Data.Map                                 as M
 import qualified Language.Esperanza.CST.Modules.Annotated as C
-import           Language.Esperanza.CST.Modules.Located   (Located (unLoc))
 import qualified Language.Esperanza.CST.Modules.Type      as TP
 import qualified Language.Esperanza.CST.Toplevel          as T
 import qualified Language.Esperanza.Parser.Expression     as PE
 import qualified Language.Esperanza.Parser.Lexer          as L
 import qualified Text.Parsec                              as P
+import qualified Data.Text as L
 
 parseVariableDeclaration :: L.Esperanza T.Toplevel
 parseVariableDeclaration =
@@ -27,7 +27,7 @@ parseVariableDeclaration =
                 ty <- PE.parseType
                 ref <-
                   P.optionMaybe
-                    (L.reservedOp "|" *> (unLoc <$> PE.parseExpression))
+                    (L.reservedOp "|" *> PE.parseExpression)
                 case ref of
                   Nothing -> return ty
                   Just _  -> return (TP.TypeRefinement (arg, ty) ref)
@@ -76,19 +76,16 @@ parseModuleDefinition :: L.Esperanza T.Toplevel
 parseModuleDefinition =
   L.lexeme $ do
     L.reserved "module"
-    name <- L.identifier
+    name <- L.identifier `P.sepBy1` P.char '.'
     xs <- L.block parseToplevel
-    return $ T.TModule name xs
+    return $ T.TModule (L.intercalate "." name) xs
 
 parseImport :: L.Esperanza T.Toplevel
 parseImport =
   L.lexeme $ do
     L.reserved "open"
-    names <-
-      P.sepBy1
-        (L.identifier <|> fromString <$> L.parens L.operator)
-        (L.reservedOp "::")
-    return $ T.TImport names
+    name <- fromString <$> L.stringLiteral
+    return $ T.TImport name
 
 parseToplevel :: L.Esperanza T.Toplevel
 parseToplevel =
