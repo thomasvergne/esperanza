@@ -22,7 +22,7 @@ block p = do
   (Indent n line) <- R.ask
   -- Checking for same line indentation
   if P.sourceLine pos == line
-    then many p
+    then many (guardSameLine *> p)
     else if P.sourceColumn pos > n && P.sourceLine pos > line
   -- Setting indent state to new source column value
            then many
@@ -30,8 +30,10 @@ block p = do
                    R.local
                      (const $ Indent (P.sourceColumn pos) (P.sourceLine pos))
                      p)
-           else fail $ "indentation of " <> show (n + 1) <> " spaces needed, but got " <>
-                show (P.sourceColumn pos)
+           else fail $
+                "indentation of " <>
+                show (n + 1) <>
+                " spaces needed, but got " <> show (P.sourceColumn pos)
 
 indented :: Parser a -> Parser a
 indented p = do
@@ -40,8 +42,18 @@ indented p = do
   if (P.sourceColumn pos > n && P.sourceLine pos > line) ||
      (P.sourceLine pos == line)
     then R.local (const $ Indent (P.sourceColumn pos) (P.sourceLine pos)) p
-    else fail $ "indentation of " <> show (n + 1) <> " spaces needed, but got " <>
-                show (P.sourceColumn pos - 1)
+    else fail $
+         "indentation of " <>
+         show (n + 1) <>
+         " spaces needed, but got " <> show (P.sourceColumn pos - 1)
+
+guardSameLine :: Parser ()
+guardSameLine = do
+  pos <- P.getPosition
+  (Indent _ line) <- R.ask
+  if P.sourceLine pos == line
+    then return ()
+    else fail $ "same line needed, but got " <> show (P.sourceLine pos)
 
 guardIndent :: Parser ()
 guardIndent = do
@@ -49,8 +61,10 @@ guardIndent = do
   (Indent n _) <- R.ask
   if P.sourceColumn pos > n
     then return ()
-    else fail $ "indentation of " <> show (n + 1) <> " spaces needed, but got " <>
-                show (P.sourceColumn pos - 1)
+    else fail $
+         "indentation of " <>
+         show (n + 1) <>
+         " spaces needed, but got " <> show (P.sourceColumn pos - 1)
 
 reservedWords :: [String]
 reservedWords =
@@ -66,6 +80,7 @@ reservedWords =
   , "do"
   , "fun"
   , "type"
+  , "val"
   ]
 
 languageDef :: Token.GenLanguageDef Text u (R.ReaderT Indentation Identity)
@@ -119,7 +134,7 @@ charLiteral :: Parser Char
 charLiteral = Token.charLiteral lexer
 
 integer :: Parser Integer
-integer = Token.integer lexer
+integer = Token.decimal lexer
 
 float :: Parser Double
 float = Token.float lexer
@@ -175,7 +190,7 @@ parseEither pa pb = Left <$> P.try pa <|> Right <$> pb
 
 lowered :: Parser String
 lowered =
-  identifier >>=
+  lexeme' identifier >>=
   (\(x:xs) ->
      if isLower x
        then return (x : xs)
