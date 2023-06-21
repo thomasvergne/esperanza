@@ -45,6 +45,18 @@ parseVariableDeclaration =
         then T.TDeclaration name' body
         else T.TFunction name' args body
 
+parseExtern :: L.Esperanza T.Toplevel
+parseExtern =
+  L.lexeme $ do
+    L.reserved "val"
+    name <- L.identifier
+    ty <-
+      P.optionMaybe
+        (do L.reservedOp ":"
+            PE.parseType)
+    let name' = C.Annotated name ty
+    return $ T.TExtern name'
+
 parseDataDeclaration :: L.Esperanza T.Toplevel
 parseDataDeclaration =
   L.lexeme $ do
@@ -80,4 +92,9 @@ parseImport =
 
 parseToplevel :: L.Esperanza T.Toplevel
 parseToplevel =
-  P.choice [parseImport, parseDataDeclaration, parseVariableDeclaration]
+  P.choice 
+    [ parseImport
+    , parseDataDeclaration
+    , parseVariableDeclaration
+    , parseExtern
+    ]

@@ -17,4 +17,5 @@ data Toplevel
   | TDeclaration (C.Annotated Ty) (Located Expression)
   | TFunction (C.Annotated Ty) [Annotated Ty] (Located Expression)
   -- ^ Variable definitions related
+  | TExtern (C.Annotated Ty)
   deriving (Eq, Show)
