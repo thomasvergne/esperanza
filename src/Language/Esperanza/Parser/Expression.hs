@@ -107,7 +107,7 @@ parseCase =
     L.reserved "with"
     P.optional (L.reservedOp "|")
     C.ECase value <$>
-      L.block ((,) <$> parsePattern <*> (L.reservedOp "=>" *> parseExpression))
+      L.block ((,) <$> parsePattern <*> L.indented (L.reservedOp "=>" *> parseExpression))
 
 parseFunction :: L.Esperanza C.Expression
 parseFunction =
