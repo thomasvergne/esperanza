@@ -10,7 +10,7 @@ import qualified Language.Esperanza.CST.Modules.Annotated as C
 
 data Toplevel
   = TModule Text [Located Toplevel]
-  | TImport [Text]
+  | TImport Text
   -- ^ Module related
   | TData (Annotated [Text]) (M.Map Text [Type Expression])
   -- ^ Datatypes related
