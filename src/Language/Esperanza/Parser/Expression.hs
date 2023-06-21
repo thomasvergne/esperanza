@@ -3,6 +3,7 @@
 module Language.Esperanza.Parser.Expression where
 
 import qualified Control.Applicative                         as A
+import           Data.Char                                   (isUpper)
 import           Data.List                                   (foldl)
 import qualified Data.Map                                    as M
 import qualified Language.Esperanza.CST.Expression           as C
@@ -17,7 +18,6 @@ import           Language.Esperanza.Parser.Modules.Operators (makeUnaryOp,
 import           Language.Esperanza.Parser.Modules.Pattern   (parsePattern)
 import qualified Text.Parsec                                 as P
 import qualified Text.Parsec.Expr                            as E
-import Data.Char (isUpper)
 
 parseExpression :: L.Esperanza C.Expression
 parseExpression = do
@@ -50,12 +50,14 @@ parseLiteral :: L.Esperanza C.Expression
 parseLiteral = L.lexeme $ C.ELiteral <$> L.parseLiteral
 
 parseVariable :: L.Esperanza C.Expression
-parseVariable = L.lexeme $ do
-  name <- parseNamespaced
-  let n = toString $ L.getVariable name
-  case n of
-    (x:_) | isUpper x -> return $ C.EDataType name
-    _                 -> return $ C.EVariable name
+parseVariable =
+  L.lexeme $ do
+    name <- parseNamespaced
+    let n = toString $ L.getVariable name
+    case n of
+      (x:_)
+        | isUpper x -> return $ C.EDataType name
+      _ -> return $ C.EVariable name
 
 parseIf :: L.Esperanza C.Expression
 parseIf =
@@ -73,7 +75,8 @@ parseBlock =
     C.EBlock <$> L.block parseExpression
 
 parseCallee :: L.Esperanza C.Expression
-parseCallee = P.choice [parseVariable, L.parens parseExpression, parseLiteral, parseList]
+parseCallee =
+  P.choice [parseVariable, L.parens parseExpression, parseLiteral, parseList]
 
 parseApp :: L.Esperanza C.Expression
 parseApp = do
@@ -107,7 +110,9 @@ parseCase =
     L.reserved "with"
     P.optional (L.reservedOp "|")
     C.ECase value <$>
-      L.block ((,) <$> parsePattern <*> L.indented (L.reservedOp "=>" *> parseExpression))
+      L.block
+        ((,) <$> parsePattern <*>
+         L.indented (L.reservedOp "=>" *> parseExpression))
 
 parseFunction :: L.Esperanza C.Expression
 parseFunction =
@@ -131,8 +136,7 @@ parseList =
   L.lexeme $ C.EList <$> L.brackets (L.commaSep (L.indented parseExpression))
 
 parseType :: L.Parser (D.Type C.Expression)
-parseType =
-  E.buildExpressionParser table term
+parseType = E.buildExpressionParser table term
   where
     table =
       [ [E.Infix (return D.TypeApp) E.AssocLeft]
@@ -153,7 +157,7 @@ refinement =
     name <- L.lowered
     L.reservedOp ":"
     ty <- parseType
-    expr <- P.optionMaybe (L.reservedOp "|" *> (C.unLoc <$> parseExpression))
+    expr <- P.optionMaybe (L.reservedOp "|" *> parseExpression)
     return $ D.TypeRefinement (fromString name, ty) expr
 
 term :: L.Parser (D.Type C.Expression)
