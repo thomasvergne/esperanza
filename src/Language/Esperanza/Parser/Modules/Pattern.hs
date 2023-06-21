@@ -14,7 +14,7 @@ parsePattern =
     [ L.parens parsePattern
     , parseLiteral
     , parseHole
-    , parseVariable
+    , P.try parseVariable
     , parseConstructor
     ]
 
