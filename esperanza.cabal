@@ -77,6 +77,15 @@ library
       Language.Esperanza.Parser.Toplevel
       Language.Esperanza.Parser.Lexer
 
+    Language.Esperanza.Module
+      Language.Esperanza.Module.AST
+      Language.Esperanza.Module.Bundling
+      Language.Esperanza.Module.Monad
+      Language.Esperanza.Module.Resolving
+
+    Language.Esperanza.AST.AST
+    Language.Esperanza.AST.Conversion
+
   -- Modules included in this library but not exported.
   -- other-modules:
 
@@ -90,6 +99,8 @@ library
 
   default-extensions:
     OverloadedStrings
+    ConstraintKinds
+    FlexibleContexts
 
   -- Other library packages from which modules are imported.
   build-depends:    
@@ -98,6 +109,8 @@ library
     , parsec
     , mtl
     , containers
+    , filepath
+    , directory
 
   -- Directories containing source files.
   hs-source-dirs:   src
